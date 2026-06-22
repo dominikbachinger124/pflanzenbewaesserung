@@ -72,7 +72,7 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 | Funktion | GPIO | Bemerkung |
 |---|---|---|
 | MOSFET Gate (Pumpe) | **GPIO 43** | Über 100Ω Vorwiderstand + 10kΩ Pulldown zu GND |
-| Batterie ADC | **GPIO 4** | Spannungsteiler 100k/100kΩ |
+| Batterie ADC | **GPIO 44** | Spannungsteiler 100k/100kΩ (LCD_BAT_VOLT) |
 | LCD Backlight | **GPIO 38** | High = Backlight an |
 | LCD Power On | **GPIO 15** | High = Display an |
 
@@ -114,7 +114,7 @@ Pumpe(-) ──→ Diode ──→ MOSFET Drain
 
 **Spannungsteiler für ADC:**
 ```
-V_BATT ──┬── 100kΩ ──→ GPIO 4 ── 100kΩ ── GND
+V_BATT ──┬── 100kΩ ──→ GPIO 44 ── 100kΩ ── GND
 
 ADC-Berechnung: V_BATT = ADC × 3.3V / 4095 × 2
 Kalibration: 3.0V = 0%, 4.2V = 100%
@@ -188,7 +188,7 @@ Der 10kΩ Widerstand zwischen Gate und GND sorgt dafür, dass der MOSFET beim Bo
 └──────────────┬───────────────────────┘
                ▼
 ┌──────────────────────────────────────┐
-│ 4. Batterie ADC messen (GPIO 4)      │
+│ 4. Batterie ADC messen (GPIO 44)     │
 │    → Akkustand in % berechnen        │
 └──────────────┬───────────────────────┘
                ▼
@@ -229,7 +229,7 @@ START
            ▼
 ┌─────────────────────┐
 │ ALLE Sensoren lesen │
-│ - Akku (GPIO 4)     │
+│ - Akku (GPIO 44)    │
 │ - Bodenfeuchte      │
 │   (GPIO 1/2)        │
 │ - Wasserstand       │
@@ -572,7 +572,7 @@ Ich programmiere ein ESP32-Projekt: Automatische Pflanzenbewässerung.
 - DC Pumpe 5V gesteuert mit MOSFET IRLZ44N an GPIO 43
 - Freilaufdiode 1N4007 parallel zur Pumpe
 - LiPo Akku mit MT3608 Step-Up auf 5V
-- Batterie-ADC an GPIO 4 (Spannungsteiler 100k/100kΩ)
+- Batterie-ADC an GPIO 44 (Spannungsteiler 100k/100kΩ, LCD_BAT_VOLT)
 - LCD Backlight GPIO 38, LCD Power GPIO 15
 
 ### UPDATE: Neue Sensoren

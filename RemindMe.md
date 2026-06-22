@@ -9,7 +9,7 @@
 ### LilyGo T-Display S3
 - **Board:** ESP32-S3 mit 170x320 TFT Display (ST7789)
 - **Framework:** Arduino / PlatformIO
-- **Akkumessung:** Eingebauter Spannungsteiler (GPIO 4)
+- **Akkumessung:** Eingebauter Spannungsteiler (GPIO 44, LCD_BAT_VOLT)
 - **Besonderheit:** Display muss über GPIO 15 eingeschaltet werden
 
 ### Bauteile-Liste
@@ -19,7 +19,7 @@
 | Bodenfeuchte | GPIO 1 (Signal), GPIO 2 (Power) | Kapazitiv, nur bei Messung einschalten |
 | Schwimmer oben | GPIO 10 | NC (Normally Closed), 10kΩ Pull-Up |
 | Schwimmer unten | GPIO 11 | NC (Normally Closed), 10kΩ Pull-Up |
-| Batteriemessung | GPIO 4 | LCD_BAT_VOLT |
+| Batteriemessung | GPIO 44 | LCD_BAT_VOLT |
 | Display Power | GPIO 15 | Muss HIGH sein |
 | Display Backlight | GPIO 38 | Muss HIGH sein |
 
@@ -29,7 +29,8 @@
 
 ### Belegte Pins (nicht verfügbar)
 ```
-GPIO 4   → Batteriemessung
+GPIO 4   → Frei (Touch0 / ADC1_CH0)
+GPIO 44  → Batteriemessung (LCD_BAT_VOLT)
 GPIO 5-9 → TFT Display (RST, CS, DC, WR, RD)
 GPIO 15  → LCD Power
 GPIO 38  → Backlight
