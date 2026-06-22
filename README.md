@@ -30,7 +30,7 @@ Intelligentes Bewässerungssystem basierend auf dem **LilyGo T-Display S3** mit 
 | Funktion | GPIO | Beschreibung |
 |----------|------|--------------|
 | **Pumpe** | 43 | MOSFET Gate |
-| **Batterie** | 4 | ADC für Akkustand |
+| **Batterie** | 44 | ADC für Akkustand |
 | **LCD Power** | 15 | Display-Stromversorgung |
 | **LCD Backlight** | 38 | Display-Beleuchtung |
 | **Bodenfeuchte VCC** | 2 | Sensor-Strom (ein/aus) |

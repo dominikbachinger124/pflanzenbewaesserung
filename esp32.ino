@@ -8,7 +8,7 @@
 
 // ── Pumpen & Strom ─────────────────────
 #define PUMP_PIN        43    // MOSFET Gate (GPIO 43)
-#define BATTERY_PIN     4     // Batterie ADC (GPIO 4 - LCD_BAT_VOLT)
+#define BATTERY_PIN     44     // Batterie ADC (GPIO 44 - LCD_BAT_VOLT)
 #define LCD_POWER_PIN   15    // LCD Power On (GPIO 15)
 
 // ── Bodenfeuchte-Sensor ─────────────────
