@@ -44,7 +44,8 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 | **Schutzdiode** | Freilaufdiode 1N4007 (parallel zur Pumpe) |
 | **Akku** | LiPo Akku (Solar-Panel → Laderegler → LiPo) |
 | **Boost** | MT3608 Step-Up Converter (5V Ausgang für Pumpe) |
-| **Vorwiderstand** | 100Ω (zwischen GPIO 13 und MOSFET Gate) |
+| **Vorwiderstand Gate** | 100Ω (zwischen GPIO 43 und MOSFET Gate) |
+| **Pulldown Gate** | 10kΩ (zwischen Gate und GND - definiert Aus-Zustand beim Boot) |
 
 ### ⬆️ UPDATE: Zusätzliche Sensoren
 
@@ -70,7 +71,7 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 
 | Funktion | GPIO | Bemerkung |
 |---|---|---|
-| MOSFET Gate (Pumpe) | **GPIO 13** | Über 100Ω Vorwiderstand |
+| MOSFET Gate (Pumpe) | **GPIO 43** | Über 100Ω Vorwiderstand + 10kΩ Pulldown zu GND |
 | Batterie ADC | **GPIO 4** | Spannungsteiler 100k/100kΩ |
 | LCD Backlight | **GPIO 38** | High = Backlight an |
 | LCD Power On | **GPIO 15** | High = Display an |
@@ -103,8 +104,11 @@ Solarmodul → Laderegler → LiPo Akku (V_BATT)
                          │
 Pumpe(-) ──→ Diode ──→ MOSFET Drain
                        │
-                       ├── Gate ← GPIO 13 (+ 100Ω Vorwiderstand)
-                       │
+                       ├── Gate ← GPIO 43 (+ 100Ω Vorwiderstand)
+                       │            │
+                       │           [10kΩ] Pulldown
+                       │            │
+                       │            ▼
                        └── Source → GND
 ```
 
@@ -146,6 +150,9 @@ LilyGo T-Display S3       Capacitive Soil Sensor
 **NC-Logik (Normally Closed):**
 - Wasser HOCH → Schwimmer schwimmt → Schalter OFFEN → GPIO liest HIGH (Pull-Up)
 - Wasser NIEDRIG → Schwimmer hängt → Schalter GESCHLOSSEN → GPIO liest LOW
+
+**Wichtig: Pulldown-Widerstand am MOSFET Gate**
+Der 10kΩ Widerstand zwischen Gate und GND sorgt dafür, dass der MOSFET beim Booten (wenn GPIO 43 noch nicht initialisiert ist) sicher im Aus-Zustand bleibt. Ohne diesen Widerstand könnte das Gate "floaten" und die Pumpe unbeabsichtigt laufen oder halb-aktiv werden.
 
 ---
 
@@ -193,10 +200,10 @@ LilyGo T-Display S3       Capacitive Soil Sensor
    ┌────────────┐  ┌─────────────┐
    │ LCD:       │  │ LCD:       │
    │ "Bewässerung"│ │ "Akku leer!" │
-   │ GPIO13 HIGH│  │ Pumpe aus   │
+   │ GPIO43 HIGH│  │ Pumpe aus   │
    │ Pumpe an   │  └──────┬──────┘
    │ 5 Min warten│        ▼
-   │ GPIO13 LOW │  ┌─────────────┐
+   │ GPIO43 LOW │  ┌─────────────┐
    │ Pumpe aus  │  │ 10 Sek warten│
    └──────┬─────┘  └──────┬──────┘
           │               │
