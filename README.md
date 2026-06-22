@@ -21,7 +21,7 @@ Intelligentes Bewässerungssystem basierend auf dem **LilyGo T-Display S3** mit 
 |------------|--------|--------------|
 | Mikrocontroller | LilyGo T-Display S3 | ESP32-S3 mit 170x320 TFT |
 | Bodenfeuchte | Capacitive Soil Moisture v1.2 | Korrosionsfrei, analog |
-| Wasserstand | Doppelter Schwimmerschalter (NC) | Zwei Pegel: "voll" und "leer" |
+| Wasserstand | Einfacher Schwimmerschalter (NO) | Ein Pegel: "leer" Warnung |
 | Pumpe | 5V/12V Mini-Pumpe | Mit MOSFET gesteuert |
 | Akku | 3.7V LiPo | 2000mAh empfohlen |
 
@@ -35,8 +35,8 @@ Intelligentes Bewässerungssystem basierend auf dem **LilyGo T-Display S3** mit 
 | **LCD Backlight** | 38 | Display-Beleuchtung |
 | **Bodenfeuchte VCC** | 2 | Sensor-Strom (ein/aus) |
 | **Bodenfeuchte Signal** | 1 | Analoger Eingang (ADC1_CH0) |
-| **Schwimmer oben** | 10 | Tank voll (NC, Pull-Up) |
-| **Schwimmer unten** | 11 | Tank leer (NC, Pull-Up) |
+| **Wasserstand** | 11 | Einfacher Schwimmer (NO, Pull-Up) |
+| *(Reserviert)* | 10 | Für spätere Erweiterungen |
 
 ### Schaltplan
 
@@ -48,21 +48,19 @@ LilyGo T-Display S3          Capacitive Soil Sensor
      GND     ──────────────────► GND
 ```
 
-#### Wasserstand (Doppelter Schwimmerschalter NC)
+#### Wasserstand (Einfacher Schwimmerschalter NO)
 ```
-LilyGo T-Display S3          Schwimmerschalter
-     GPIO 10 ──┬──[10kΩ]── 3.3V
-               │
-               └── Schwimmer 1 (oben, NC)
-               
+LilyGo T-Display S3          Schwimmerschalter (NO)
      GPIO 11 ──┬──[10kΩ]── 3.3V
                │
-               └── Schwimmer 2 (unten, NC)
+               └── Schwimmer (schließt bei "leer")
                
-     GND ──────┴────────────── Gemeinsamer Kontakt
+     GND ──────┴────────────── Kontakt
 ```
 
-**NC = Normally Closed:** Schalter ist geschlossen wenn der Schwimmer hängt (Wasser niedrig)
+**NO = Normally Open:** 
+- **Wasser vorhanden** → Schwimmer schwimmt → Schalter **OFFEN** → GPIO liest **HIGH** (Pull-Up)
+- **Tank leer** → Schwimmer hängt → Schalter **GESCHLOSSEN** → GPIO liest **LOW** → Bewässerung STOPP!
 
 ## Software
 
@@ -94,17 +92,17 @@ Das System prüft in dieser Reihenfolge:
 │─────────────────│
 │ Akku: [████░░]  │  ← Akkustand mit Balken
 │ Erde: [██░░░░]  │  ← Bodenfeuchte 0-100%
-│ Wasser: ○ ○ OK  │  ← Oberer/Unt. Schwimmer
+│ Wasser: ○ OK    │  ← Schwimmer (○ = leer, ● = OK)
 │─────────────────│
 │ Bewaessere!     │  ← Status
 │     12s ~~~     │  ← Countdown (bei Gießen)
 └─────────────────┘
 ```
 
-**Wasserstand-Indikatoren:**
-- `○` = leer (Schwimmer unten)
-- `●` = voll (Schwimmer schwimmt)
-- Text: `OK` / `MITTE` / `LEER!`
+**Wasserstand-Indikator (einfacher NO Schalter):**
+- `●` = OK (Schwimmer schwimmt, Schalter offen)
+- `○` = LEER! (Schwimmer hängt, Schalter geschlossen)
+- Text: `OK` oder `LEER!`
 
 ## Installation
 

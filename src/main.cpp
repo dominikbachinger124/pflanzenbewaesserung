@@ -174,12 +174,14 @@ void initWasserstand() {
 }
 
 bool leseWasserstandOben() {
-    // NC Schalter: LOW = geschlossen (Wasser hoch), HIGH = offen (Wasser niedrig)
+    // NO Schalter: HIGH = offen (genug Wasser), LOW = geschlossen (Wasser niedrig)
+    // Pull-Up aktiv: Wenn Schalter offen (Wasser da) → HIGH
+    // Wenn Schalter geschlossen (leer) → LOW
     return digitalRead(FLOAT_UPPER_PIN) == HIGH;
 }
 
 bool leseWasserstandUnten() {
-    // NC Schalter: LOW = geschlossen (Wasser niedrig), HIGH = offen (Wasser hoch)
+    // NO Schalter: HIGH = offen (Wasser vorhanden), LOW = geschlossen (fast leer)
     return digitalRead(FLOAT_LOWER_PIN) == HIGH;
 }
 
@@ -196,11 +198,12 @@ SensorDaten leseAlleSensoren() {
     daten.wasserOben = leseWasserstandOben();
     daten.wasserUnten = leseWasserstandUnten();
     
-    // Logik für Tank-Zustand
-    // Oberer offen (HIGH) + Unterer offen (HIGH) = Tank voll
-    // Oberer geschlossen (LOW) + Unterer geschlossen (LOW) = Tank leer
-    daten.tankVoll = daten.wasserOben && daten.wasserUnten;
-    daten.tankLeer = !daten.wasserOben && !daten.wasserUnten;
+    // Logik für Tank-Zustand (NO Schalter)
+    // HIGH = Schalter offen = Wasser da
+    // LOW = Schalter geschlossen = Wasser leer
+    // Für einfachen Schalter an GPIO 11 (nur unterer):
+    daten.tankVoll = daten.wasserUnten;  // HIGH = Wasser da
+    daten.tankLeer = !daten.wasserUnten; // LOW = Wasser leer!
     
     return daten;
 }

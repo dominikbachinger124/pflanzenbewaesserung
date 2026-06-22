@@ -165,21 +165,21 @@ bool sollGiessen(int bodenfeuchteRaw) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WASSERSTAND FUNKTIONEN (Doppelter NC Schwimmerschalter)
+// WASSERSTAND FUNKTIONEN (NO Schwimmerschalter - einfach)
 // ═════════════════════════════════════════════════════════════════════════════
 
 void initWasserstand() {
-    pinMode(FLOAT_UPPER_PIN, INPUT_PULLUP);  // Pull-Up für NC Schalter
-    pinMode(FLOAT_LOWER_PIN, INPUT_PULLUP);
+    pinMode(FLOAT_UPPER_PIN, INPUT_PULLUP);  // Optional: zweiter Schwimmer
+    pinMode(FLOAT_LOWER_PIN, INPUT_PULLUP);  // Haupt-Schwimmer (leer/WARNUNG)
 }
 
 bool leseWasserstandOben() {
-    // NC Schalter: LOW = geschlossen (Wasser hoch), HIGH = offen (Wasser niedrig)
+    // NO Schalter: HIGH = offen (Wasser da), LOW = geschlossen (Wasser niedrig)
     return digitalRead(FLOAT_UPPER_PIN) == HIGH;
 }
 
 bool leseWasserstandUnten() {
-    // NC Schalter: LOW = geschlossen (Wasser niedrig), HIGH = offen (Wasser hoch)
+    // NO Schalter: HIGH = offen (Wasser vorhanden), LOW = geschlossen (leer!)
     return digitalRead(FLOAT_LOWER_PIN) == HIGH;
 }
 
@@ -196,11 +196,12 @@ SensorDaten leseAlleSensoren() {
     daten.wasserOben = leseWasserstandOben();
     daten.wasserUnten = leseWasserstandUnten();
     
-    // Logik für Tank-Zustand
-    // Oberer offen (HIGH) + Unterer offen (HIGH) = Tank voll
-    // Oberer geschlossen (LOW) + Unterer geschlossen (LOW) = Tank leer
-    daten.tankVoll = daten.wasserOben && daten.wasserUnten;
-    daten.tankLeer = !daten.wasserOben && !daten.wasserUnten;
+    // Logik für Tank-Zustand (NO Schalter)
+    // HIGH = Schalter offen = Wasser da
+    // LOW = Schalter geschlossen = Wasser leer
+    // Für einfachen Schwimmer an GPIO 11:
+    daten.tankVoll = daten.wasserUnten;   // HIGH = Wasser da
+    daten.tankLeer = !daten.wasserUnten;  // LOW = Wasser leer!
     
     return daten;
 }

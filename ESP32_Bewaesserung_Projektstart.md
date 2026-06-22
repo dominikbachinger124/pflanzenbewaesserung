@@ -19,8 +19,8 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
    - Bewässert nur wenn nötig (verhindert Überwässerung)
    - Wird nur bei Messung eingeschaltet (Stromsparen)
 
-2. **Wasserstand-Sensor** (Doppelter Schwimmerschalter, NC)
-   - Zwei Pegel: "Tank voll" und "Tank leer"
+2. **Wasserstand-Sensor** (Einfacher Schwimmerschalter, NO)
+   - Ein Pegel: "Tank leer" Warnung
    - Bewässert nur wenn genug Wasser im Tank ist
    - Schützt Pumpe vor Trockenlauf
 
@@ -52,8 +52,8 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 | Komponente | Spezifikation | Anschluss |
 |---|---|---|
 | **Bodenfeuchte-Sensor** | Capacitive Soil Moisture v1.2 (korrosionsfrei) | GPIO 1 (Signal), GPIO 2 (Power) |
-| **Wasserstand-Sensor** | Doppelter Schwimmerschalter, NC, SUS 304 | GPIO 10 (oben), GPIO 11 (unten) |
-| **Pull-Up Widerstände** | 10kΩ für beide Schwimmer | 3.3V → GPIO über Widerstand |
+| **Wasserstand-Sensor** | Einfacher Schwimmerschalter, NO, SUS 304 | GPIO 11 (leer-Erkennung) |
+| **Pull-Up Widerstand** | 10kΩ | 3.3V → GPIO 11 |
 
 **Hinweis zum Bodenfeuchte-Sensor:**
 - Kapazitiv = keine Korrosion (kein Strom durch Erde)
@@ -61,9 +61,9 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 - Analoger Ausgang 0-3.3V (0-4095 ADC)
 
 **Hinweis zum Schwimmerschalter:**
-- NC (Normally Closed) = Schalter ist zu wenn Wasser niedrig
+- NO (Normally Open) = Schalter schließt wenn Wasser niedrig
 - Pull-Up Widerstand erforderlich (10kΩ)
-- Zwei Schwimmer für zwei Pegel: "voll" und "leer"
+- Ein Schwimmer für "leer" Erkennung
 
 ---
 
@@ -82,8 +82,8 @@ Das Projekt wurde um zwei wichtige Sensoren erweitert:
 |---|---|---|
 | Bodenfeuchte VCC | **GPIO 2** | Digital Out, nur bei Messung HIGH |
 | Bodenfeuchte Signal | **GPIO 1** | Analog In (ADC1_CH0) |
-| Schwimmer oben (Tank voll) | **GPIO 10** | INPUT_PULLUP, NC Schalter |
-| Schwimmer unten (Tank leer) | **GPIO 11** | INPUT_PULLUP, NC Schalter |
+| Wasserstand Schwimmer | **GPIO 11** | INPUT_PULLUP, NO Schalter (leer-Erkennung) |
+| *(Reserviert)* | **GPIO 10** | Für spätere Erweiterungen |
 
 > **Hinweis:** Die LCD-Datenpins (D0–D7, WR, RD, CS, RES, DC) werden intern über **TFT_eSPI** verwaltet – kein externer I2C-Adapter nötig!
 
@@ -132,24 +132,18 @@ LilyGo T-Display S3       Capacitive Soil Sensor
      GND     ───────────────► GND
 ```
 
-**Wasserstand-Sensor (Doppelter Schwimmer, NC):**
+**Wasserstand-Sensor (Einfacher Schwimmer, NO):**
 ```
-3.3V ───[10kΩ]───┬──────── GPIO 10 (Oberer Schwimmer)
+3.3V ───[10kΩ]───┬──────── GPIO 11 (Wasserstand)
                  │
-          NC-Schalter (schließt bei "Wasser niedrig")
-                 │
-                GND
-
-3.3V ───[10kΩ]───┬──────── GPIO 11 (Unterer Schwimmer)
-                 │
-          NC-Schalter (schließt bei "Wasser niedrig")
+          NO-Schalter (schließt bei "Wasser leer")
                  │
                 GND
 ```
 
-**NC-Logik (Normally Closed):**
-- Wasser HOCH → Schwimmer schwimmt → Schalter OFFEN → GPIO liest HIGH (Pull-Up)
-- Wasser NIEDRIG → Schwimmer hängt → Schalter GESCHLOSSEN → GPIO liest LOW
+**NO-Logik (Normally Open):**
+- **Wasser vorhanden** → Schwimmer schwimmt → Schalter OFFEN → GPIO liest **HIGH** (Pull-Up) → OK!
+- **Tank leer** → Schwimmer hängt → Schalter GESCHLOSSEN → GPIO liest **LOW** → Bewässerung STOPP!
 
 **Wichtig: Pulldown-Widerstand am MOSFET Gate**
 Der 10kΩ Widerstand zwischen Gate und GND sorgt dafür, dass der MOSFET beim Booten (wenn GPIO 43 noch nicht initialisiert ist) sicher im Aus-Zustand bleibt. Ohne diesen Widerstand könnte das Gate "floaten" und die Pumpe unbeabsichtigt laufen oder halb-aktiv werden.
