@@ -7,7 +7,7 @@
 #define BATTERY_PIN     4     // LCD_BAT_VOLT GPIO 4!
 
 // ── Einstellungen ─────────────────────
-#define PUMP_DURATION   300   // 5 Minuten in Sekunden
+#define PUMP_DURATION   15    // 15 Sekunden (Pumpe ist stark!)
 #define SLEEP_DURATION  3600  // 1 Stunde
 #define BAT_MIN         20    // % Mindestladung
 #define R1              100000
