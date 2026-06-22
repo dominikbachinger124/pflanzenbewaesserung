@@ -21,7 +21,7 @@ Intelligentes Bewässerungssystem basierend auf dem **LilyGo T-Display S3** mit 
 |------------|--------|--------------|
 | Mikrocontroller | LilyGo T-Display S3 | ESP32-S3 mit 170x320 TFT |
 | Bodenfeuchte | Capacitive Soil Moisture v1.2 | Korrosionsfrei, analog |
-| Wasserstand | Einfacher Schwimmerschalter (NO) | Ein Pegel: "leer" Warnung |
+| Wasserstand | Doppelter Schwimmerschalter (NO) | Zwei Pegel: 50% und 25% Füllstand |
 | Pumpe | 5V/12V Mini-Pumpe | Mit MOSFET gesteuert |
 | Akku | 3.7V LiPo | 2000mAh empfohlen |
 
@@ -35,8 +35,8 @@ Intelligentes Bewässerungssystem basierend auf dem **LilyGo T-Display S3** mit 
 | **LCD Backlight** | 38 | Display-Beleuchtung |
 | **Bodenfeuchte VCC** | 2 | Sensor-Strom (ein/aus) |
 | **Bodenfeuchte Signal** | 1 | Analoger Eingang (ADC1_CH0) |
-| **Wasserstand** | 11 | Einfacher Schwimmer (NO, Pull-Up) |
-| *(Reserviert)* | 10 | Für spätere Erweiterungen |
+| **Schwimmer oben (50%)** | 10 | NO Schalter (50% Füllstand) |
+| **Schwimmer unten (25%)** | 11 | NO Schalter (25% Füllstand, kritisch) |
 
 ### Schaltplan
 
@@ -48,19 +48,24 @@ LilyGo T-Display S3          Capacitive Soil Sensor
      GND     ──────────────────► GND
 ```
 
-#### Wasserstand (Einfacher Schwimmerschalter NO)
+#### Wasserstand (Doppelter Schwimmerschalter NO)
 ```
 LilyGo T-Display S3          Schwimmerschalter (NO)
+     GPIO 10 ──┬──[10kΩ]── 3.3V
+               │
+               └── Schwimmer 1 (50% Füllstand)
+               
      GPIO 11 ──┬──[10kΩ]── 3.3V
                │
-               └── Schwimmer (schließt bei "leer")
+               └── Schwimmer 2 (25% Füllstand, kritisch)
                
-     GND ──────┴────────────── Kontakt
+     GND ──────┴────────────── Gemeinsamer Kontakt
 ```
 
 **NO = Normally Open:** 
-- **Wasser vorhanden** → Schwimmer schwimmt → Schalter **OFFEN** → GPIO liest **HIGH** (Pull-Up)
-- **Tank leer** → Schwimmer hängt → Schalter **GESCHLOSSEN** → GPIO liest **LOW** → Bewässerung STOPP!
+- **Wasser > 50%** → Beide schwimmen → Beide Schalter **OFFEN** → GPIOs lesen **HIGH**
+- **Wasser < 50%** → Oberer hängt → GPIO 10 **LOW**, GPIO 11 **HIGH**
+- **Wasser < 25%** → Beide hängen → Beide **LOW** → Bewässerung **STOPP**!
 
 ## Software
 
